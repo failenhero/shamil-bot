@@ -3,8 +3,12 @@ import random
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 
-TOKEN = "7639556805:AAGcvhn7_oxA-vluXu1MUUYDja3aNlbk8cE"
-ALLOWED_CHAT_IDS = [-1002534718552, -1002735003462]  # добавьте сюда нужные ID групп
+TOKEN = os.environ.get("BOT_TOKEN")
+if not TOKEN:
+    raise SystemExit("[ERROR] Не задан BOT_TOKEN. Скопируйте .env.example в .env и впишите токен от @BotFather.")
+
+# ID групп через запятую в переменной ALLOWED_CHAT_IDS. Пусто = работать везде.
+ALLOWED_CHAT_IDS = [int(x) for x in os.environ.get("ALLOWED_CHAT_IDS", "").replace(" ", "").split(",") if x]
 VOICE_FOLDER = "voices"
 
 async def send_voice_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -61,6 +65,7 @@ if __name__ == "__main__":
 
     app.add_handler(MessageHandler(filters.Entity("mention"), handle_mention))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_keyword))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), log_all_messages))
+    # group=1: иначе этот хендлер не срабатывает — в group=0 отрабатывает только первый подходящий.
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), log_all_messages), group=1)
 
     app.run_polling()

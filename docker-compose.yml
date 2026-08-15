@@ -1,0 +1,15 @@
+services:
+  bot:
+    build: .
+    container_name: shamil-bot
+    env_file: .env
+    volumes:
+      # Новые .ogg можно просто положить в ./voices — пересборка не нужна,
+      # папка читается заново на каждое срабатывание.
+      - ./voices:/app/voices:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
